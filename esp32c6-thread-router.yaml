@@ -1,0 +1,41 @@
+# ESPHome Configuration für ESP32-C6 Thread Router
+esphome:
+  name: esp32c6-thread-router
+  friendly_name: ESP32-C6 Thread Router
+
+# ESP32-C6 Board Konfiguration mit ESP-IDF Framework (erforderlich für Thread)
+esp32:
+  board: esp32-c6-devkitm-1
+  framework:
+    type: esp-idf
+
+# Logger für Debugging
+logger:
+
+# API für Home Assistant Verbindung
+api:
+  encryption:
+    key: !secret api_encryption_key
+
+# OTA Updates
+ota:
+  - platform: esphome
+    password: !secret ota_password
+
+# WiFi Konfiguration (optional, für Dual-Mode)
+# wifi:
+#   ssid: !secret wifi_ssid
+#   password: !secret wifi_password
+#   ap:
+#     ssid: "ESP32C6-Thread-Router"
+#     password: !secret ap_password
+
+# IPv6 aktivieren (erforderlich für Thread)
+network:
+  enable_ipv6: true
+
+# OpenThread Konfiguration
+openthread:
+  device_type: FTD  # Full Thread Device = Router
+  tlv: !secret thread_tlv
+
