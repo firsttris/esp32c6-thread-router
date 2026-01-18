@@ -4,6 +4,14 @@
 
 ESPHome configuration for an ESP32-C6 Thread Router that integrates with Home Assistant. This setup allows you to extend your Thread network coverage using an affordable ESP32-C6 board.
 
+## Prerequisites
+
+- ESP32-C6 board - tested with [Seeed Studio XIAO ESP32C6](https://www.seeedstudio.com/Seeed-Studio-XIAO-ESP32C6-p-5884.html)
+- Thread Border Router in network (e.g., Home Assistant with Thread integration)
+- ESPHome installed
+- USB cable for initial flashing
+- **Optional**: 3D-printed case - [XIAO ESP32-C6 Thread Router Case](https://www.printables.com/model/1543275-xiao-esp32-c6-zigbee-router-case-split-lid-sma-ext)
+
 ## Required Information
 
 ### 1. Thread Network Dataset (TLV)
@@ -119,14 +127,6 @@ esphome run esp32c6-thread-router.yaml --device=/dev/ttyACM0
 esphome dashboard .
 ```
 Then open browser at `http://localhost:6052` and use the web interface.
-
-## Prerequisites
-
-- ESP32-C6 board - tested with [Seeed Studio XIAO ESP32C6](https://www.seeedstudio.com/Seeed-Studio-XIAO-ESP32C6-p-5884.html)
-- Thread Border Router in network (e.g., Home Assistant with Thread integration)
-- ESPHome installed
-- USB cable for initial flashing
-- **Optional**: 3D-printed case - [XIAO ESP32-C6 Thread Router Case](https://www.printables.com/model/1543275-xiao-esp32-c6-zigbee-router-case-split-lid-sma-ext)
 
 ## Device Type: FTD vs MTD
 
