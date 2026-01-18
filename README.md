@@ -144,19 +144,36 @@ esphome run esp32c6-thread-router.yaml --device=/dev/ttyACM0
 - Linux/macOS: `ls /dev/tty*`
 - Windows: Device Manager
 
-### 🔐 USB Permissions
+### 🔐 USB Permission Issues
 
-**Linux - Add user to dialout group:**
+**Standard Linux - Add user to dialout group:**
 ```bash
 sudo usermod -a -G dialout $USER
 # Then log out and back in
 ```
 
-> ⚠️ **Fedora Atomic/Bazzite with rootless Docker/Podman:** The `dialout` group method doesn't work reliably. Use `chmod 666` instead.
+**Fedora Atomic/Bazzite with rootless Docker/Podman:**
 
-### ⏱️ First Flash
-- Initial compilation takes **5-10 minutes**
-- Subsequent OTA updates are much faster
+The dialout group doesn't work reliably on immutable systems. You need to fix permissions before each flash:
+
+```bash
+# Check permissions
+ls -la /dev/ttyACM0
+# Output: crw-rw----. 1 root dialout 166, 0 ...
+
+# Fix temporarily (resets on USB reconnect)
+sudo chmod 666 /dev/ttyACM0
+```
+
+> ⚠️ **Note:** You need to run `sudo chmod 666` each time you reconnect the USB device.
+
+### 📁 Path Issues (Docker/Podman)
+
+The docker-compose.yml mounts `.../config` (parent directory) to `/config` in the container. This is required so ESPHome finds build files.
+
+Inside the container, you have two options:
+- Use full path: `/config/Thread/esp32c6-thread-router.yaml`
+- OR `cd /config/Thread` first, then use: `esp32c6-thread-router.yaml`
 
 ### 📡 OTA Updates
 After initial USB flash, all future updates can be done **wirelessly via Thread!**
@@ -267,32 +284,7 @@ podman exec otbr ot-ctl state
 - Add it to Home Assistant (use `esp32c6-thread-router.local` or IPv6 address)
 - Check device status - should show "Online"
 
-## 🔧 Troubleshooting
-
-### 🔐 USB Permission Issues (Docker/Podman rootless)
-
-On Fedora Atomic/Bazzite or similar systems, the dialout group doesn't work reliably. You need to fix permissions before each flash:
-
-```bash
-# Check permissions
-ls -la /dev/ttyACM0
-# Output: crw-rw----. 1 root dialout 166, 0 ...
-
-# Fix temporarily (resets on USB reconnect)
-sudo chmod 666 /dev/ttyACM0
-```
-
----
-
-### 📁 Path Issues
-
-The docker-compose.yml mounts `.../config` (parent directory) to `/config` in the container. This is required so ESPHome finds build files.
-
-Inside the container, you have two options:
-- Use full path: `/config/Thread/esp32c6-thread-router.yaml`
-- OR `cd /config/Thread` first, then use: `esp32c6-thread-router.yaml`
-
-## 🔢 Multiple Thread Routers
+##  Multiple Thread Routers
 
 To flash multiple ESP32-C6 devices and use them as separate routers in the same Thread network:
 
