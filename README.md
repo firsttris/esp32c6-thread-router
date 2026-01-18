@@ -102,6 +102,12 @@ esphome run esp32c6-thread-router.yaml --device=/dev/ttyACM0
   - macOS: `/dev/cu.usbserial-*` or `/dev/cu.wchusbserial*`
   - Windows: `COM3`, `COM4`, etc.
 - Check available ports: `ls /dev/tty*` (Linux/macOS) or Device Manager (Windows)
+- Ensure your user has access to the USB port:
+  ```bash
+  # Linux: Add user to dialout group
+  sudo usermod -a -G dialout $USER
+  # Then log out and back in
+  ```
 - **USB permissions for rootless Docker/Podman:**
   
   ⚠️ **On Fedora Atomic/Bazzite with rootless containers**, the `dialout` group method doesn't work reliably. You need to fix permissions with chmod 666:
