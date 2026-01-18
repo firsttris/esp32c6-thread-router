@@ -55,7 +55,6 @@ thread_tlv: "YOUR_TLV_HEX_HERE"
 <table>
 <tr><td>✅ Channel</td><td>✅ Network Name</td><td>✅ PAN ID & Extended PAN ID</td></tr>
 <tr><td>✅ Network Key (encrypted)</td><td>✅ PSKc (encrypted)</td><td>✅ Mesh-Local Prefix</td></tr>
-<tr><td colspan="3" align="center">✅ All other parameters</td></tr>
 </table>
 
 ### 🔐 2. ESPHome Secrets
