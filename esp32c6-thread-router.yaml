@@ -14,13 +14,10 @@ logger:
 
 # API für Home Assistant Verbindung
 api:
-  encryption:
-    key: !secret api_encryption_key
 
 # OTA Updates
 ota:
   - platform: esphome
-    password: !secret ota_password
 
 # WiFi Konfiguration (optional, für Dual-Mode)
 # wifi:
