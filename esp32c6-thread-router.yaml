@@ -19,14 +19,6 @@ api:
 ota:
   - platform: esphome
 
-# WiFi Konfiguration (optional, für Dual-Mode)
-# wifi:
-#   ssid: !secret wifi_ssid
-#   password: !secret wifi_password
-#   ap:
-#     ssid: "ESP32C6-Thread-Router"
-#     password: !secret ap_password
-
 # IPv6 aktivieren (erforderlich für Thread)
 network:
   enable_ipv6: true

@@ -1,5 +1,7 @@
 # ESP32-C6 Thread Router Configuration
 
+<img src="./thread-router-image.jpg" alt="ESP32-C6 Thread Router" width="500">
+
 ESPHome configuration for an ESP32-C6 Thread Router that integrates with Home Assistant. This setup allows you to extend your Thread network coverage using an affordable ESP32-C6 board.
 
 ## Required Information
@@ -37,31 +39,29 @@ ESPHome configuration for an ESP32-C6 Thread Router that integrates with Home As
 In `secrets.yaml` you need:
 
 - **thread_tlv**: Your Thread network commissioning data (see above)
-- **WiFi credentials** (optional, only if you enable WiFi)
 
 **Note**: API encryption key and OTA password are optional - ESPHome generates them automatically if not specified.
 
-### 3. WiFi - Yes or No?
+### 3. WiFi
 
-**For a dedicated Thread Router: WiFi NOT recommended**
-- ❌ Thread and WiFi both use 2.4 GHz → possible interference
-- ❌ Higher power consumption
-- ✅ Thread router communicates via Thread network (IPv6)
-- ✅ OTA updates work over Thread/API
+**WiFi is not needed!** This Thread router operates entirely over the Thread network (IPv6):
+- ✅ Device communication via Thread mesh
+- ✅ OTA updates via Thread/API
+- ✅ Logging via Thread/API or USB
+- ✅ Home Assistant integration via Thread
 
-**Only enable WiFi if:**
-- You need dual-mode (Thread + WiFi simultaneously)
-- Helpful for initial debugging
-
-**Current config has WiFi commented out = optimal for Thread router!**
+No WiFi configuration required - everything works over Thread!
 
 ## Installation
 
 ### 1. Configure Secrets
 
-Edit `secrets.yaml` with your credentials:
-- WiFi credentials are optional (only needed if you uncomment WiFi in the config
-- **ota_password**: Set a secure password for OTA updates (must not be a placeholder)
+Edit `secrets.yaml` with your Thread TLV:
+```yaml
+thread_tlv: "YOUR_TLV_HEX_HERE"
+```
+
+That's all you need - no WiFi credentials required!
 
 ### 2. Compile and Flash Firmware
 
@@ -97,17 +97,14 @@ esphome run esp32c6-thread-router.yaml --device=/dev/ttyACM0
 ```
 
 **Notes**:
-- Adjust the device path (`/dev/ttyUSB0`) to your system:
+- Adjust the device path if needed:
   - Linux: `/dev/ttyUSB0`, `/dev/ttyACM0`, or `/dev/ttyUSB1`
   - macOS: `/dev/cu.usbserial-*` or `/dev/cu.wchusbserial*`
   - Windows: `COM3`, `COM4`, etc.
 - Check available ports: `ls /dev/tty*` (Linux/macOS) or Device Manager (Windows)
-- Ensure your user has access to the USB port:
-  ```bash
-  # Linux: Add user to dialout group
-  sudo usermod -a -G dialout $USER
-  # Then log out and back in
-  ```
+- **USB permissions for rootless Docker/Podman:**
+  
+  ⚠️ **On Fedora Atomic/Bazzite with rootless containers**, the `dialout` group method doesn't work reliably. You need to fix permissions with chmod 666:
 - The first flash will compile the firmware – this may take 5-10 minutes
 - After initial USB flash, subsequent updates can be done wirelessly via OTA
 
@@ -119,15 +116,50 @@ Then open browser at `http://localhost:6052` and use the web interface.
 
 ## Prerequisites
 
-- ESP32-C6 board (e.g., ESP32-C6-DevKitM-1)
+- ESP32-C6 board - tested with [Seeed Studio XIAO ESP32C6](https://www.seeedstudio.com/Seeed-Studio-XIAO-ESP32C6-p-5884.html)
 - Thread Border Router in network (e.g., Home Assistant with Thread integration)
 - ESPHome installed
 - USB cable for initial flashing
+- **Optional**: 3D-printed case - [XIAO ESP32-C6 Thread Router Case](https://www.printables.com/model/1543275-xiao-esp32-c6-zigbee-router-case-split-lid-sma-ext)
 
 ## Device Type: FTD vs MTD
 
 - **FTD (Full Thread Device)**: Can act as router and connect other devices (recommended for routers)
 - **MTD (Minimal Thread Device)**: End device, cannot route, more power efficient
+
+## Logging Without WiFi
+
+**Good news**: You can log the device over-the-air even with WiFi disabled!
+
+### Logging Options:
+
+**1. Serial Connection (USB)** - Always available:
+
+**2. Over Thread Network (OTA)** - Works without WiFi:
+```bash
+# Docker/Podman
+docker-compose exec esphome esphome logs /config/Thread/esp32c6-thread-router.yaml
+
+# Local ESPHome
+esphome logs esp32c6-thread-router.yaml
+```
+Choose "Over The Air" when prompted. The device uses its Thread IPv6 address to connect.
+
+**3. Via Home Assistant** - Most convenient:
+- Go to **Settings → Devices & Services → ESPHome**
+- Click on your device (ESP32-C6 Thread Router)
+- Click **"Logs"** button
+- Real-time logs appear directly in Home Assistant web interface
+
+### How it works:
+
+The current configuration is optimized for Thread-only operation:
+- ✅ `api:` enables Home Assistant connection over Thread/IPv6
+- ✅ `logger:` is active and works over the API
+- ✅ `network.enable_ipv6: true` enables Thread communication
+- ✅ WiFi is disabled (no interference, lower power)
+
+Once the ESP32-C6 is connected to Home Assistant via Thread, all logging happens "over the air" through the Thread mesh network - no WiFi needed!
 
 ## Verification & Testing
 
