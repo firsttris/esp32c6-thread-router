@@ -101,20 +101,10 @@ Connect your ESP32-C6 via USB and flash the firmware.
 > ⚠️ **Important:** When using Docker/Podman (rootless), you need to fix USB permissions before flashing:
 
 ```bash
-# 1. Check current device permissions
-ls -la /dev/ttyACM0
-# Should show: crw-rw----. 1 root dialout 166, 0 ...
-
-# 2. Fix permissions (required each time you reconnect USB)
-sudo chmod 666 /dev/ttyACM0
-
-# 3. Navigate to Thread directory
-cd /home/tristan/Projects/esphome/config/Thread
-
-# 4. Start container
+# 1. Start container
 docker-compose up -d
 
-# 5. Flash the firmware
+# 2. Flash the firmware
 docker-compose exec esphome esphome run /config/Thread/esp32c6-thread-router.yaml --device=/dev/ttyACM0
 ```
 
