@@ -1,8 +1,8 @@
-# ESP32-C6 Thread Router Configuration
+# ESP32-C6 Thread Router - Extend Your Thread Network Coverage
 
 <img src="./thread-router-image.jpg" alt="ESP32-C6 Thread Router" width="500">
 
-ESPHome configuration for an ESP32-C6 Thread Router that integrates with Home Assistant. This setup allows you to extend your Thread network coverage using an affordable ESP32-C6 board.
+Extend your Thread network coverage with an affordable ESP32-C6 router! This ESPHome configuration turns an ESP32-C6 board into a Thread FTD (Full Thread Device) router that seamlessly integrates with Home Assistant to expand your Thread mesh network and improve connectivity for your Thread devices.
 
 ## Prerequisites
 
@@ -253,14 +253,60 @@ Inside the container, you have two options:
 - Move ESP32-C6 closer to Border Router
 - Restart ESP32-C6 (unplug/replug USB)
 
+## Multiple Thread Routers
+
+To flash multiple ESP32-C6 devices and use them as separate routers in the same Thread network:
+
+### 1. Create Device-Specific Configuration Files
+
+For each additional device, create a new YAML file (e.g., `esp32c6-thread-router-2.yaml`):
+
+```yaml
+esphome:
+  name: esp32c6-thread-router-2          # Must be unique!
+  friendly_name: ESP32-C6 Thread Router 2  # Optional but helpful
+
+openthread:
+  device_type: FTD
+  tlv: !secret thread_tlv  # Same TLV = same Thread network
+```
+
+### 2. What Must Be Changed
+
+- ✅ **`name`**: Must be unique (e.g., `esp32c6-thread-router-2`, `esp32c6-thread-router-3`)
+  - This becomes the hostname and Home Assistant identifier
+- ✅ **`friendly_name`**: Should be changed for easier identification
+
+### 3. What Can Stay the Same
+
+- ✅ **`thread_tlv`**: Use the same TLV for all routers to join them to the same Thread network
+- ✅ All other settings (board, framework, components) can remain identical
+
+### 4. Flash Additional Devices
+
+```bash
+# Fix USB permissions
+sudo chmod 666 /dev/ttyACM0
+
+# Flash second device
+docker-compose exec esphome esphome run /config/Thread/esp32c6-thread-router-2.yaml --device=/dev/ttyACM0
+
+# Flash third device
+docker-compose exec esphome esphome run /config/Thread/esp32c6-thread-router-3.yaml --device=/dev/ttyACM0
+```
+
+Each device will join the same Thread network and act as an independent router, extending your mesh coverage.
+
 ## File Structure
 
 ```
 .
-├── esp32c6-thread-router.yaml  # Main ESPHome configuration
-├── secrets.yaml                # Sensitive credentials (not in git)
-├── .gitignore                  # Excludes secrets and build artifacts
-└── README.md                   # This file
+├── esp32c6-thread-router.yaml    # Main ESPHome configuration
+├── esp32c6-thread-router-2.yaml  # Optional: Second router
+├── esp32c6-thread-router-3.yaml  # Optional: Third router
+├── secrets.yaml                  # Shared credentials (not in git)
+├── .gitignore                    # Excludes secrets and build artifacts
+└── README.md                     # This file
 ```
 
 ## Further Resources
