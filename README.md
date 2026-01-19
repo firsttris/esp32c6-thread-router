@@ -143,14 +143,6 @@ docker-compose exec esphome esphome run /config/Thread/esp32c6-thread-router.yam
 
 > **📌 Note:** The docker-compose.yml mounts the parent `config/` directory to `/config` in the container. That's why you need `/config/Thread/` in the path above. This is necessary so ESPHome can find the build files in `.esphome/`.
 
-### 📁 Path Issues (Docker/Podman)
-
-The docker-compose.yml mounts `.../config` (parent directory) to `/config` in the container. This is required so ESPHome finds build files.
-
-Inside the container, you have two options:
-- Use full path: `/config/Thread/esp32c6-thread-router.yaml`
-- OR `cd /config/Thread` first, then use: `esp32c6-thread-router.yaml`
-
 </details>
 
 ---
