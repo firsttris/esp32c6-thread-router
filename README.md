@@ -65,19 +65,6 @@ In `secrets.yaml` you need:
 |-----|-------------|----------|
 | **thread_tlv** | Your Thread network commissioning data | ✅ Required |
 
-### 📡 3. WiFi
-
-> **🚀 WiFi is not needed!** This Thread router operates entirely over the Thread network (IPv6).
-
-| Feature | Status |
-|---------|--------|
-| 📡 Device communication | ✅ Via Thread mesh |
-| 🔄 OTA updates | ✅ Via Thread/API |
-| 📝 Logging | ✅ Via Thread/API or USB |
-| 🏠 Home Assistant | ✅ Via Thread |
-
-**No WiFi configuration required - everything works over Thread!**
-
 ## 🚀 Installation
 
 ### 📝 Step 1: Configure Secrets
@@ -270,30 +257,7 @@ openthread:
   device_type: FTD
   tlv: !secret thread_tlv  # Same TLV = same Thread network
 ```
-
-### 2. What Must Be Changed
-
-- ✅ **`name`**: Must be unique (e.g., `esp32c6-thread-router-2`, `esp32c6-thread-router-3`)
-  - This becomes the hostname and Home Assistant identifier
-- ✅ **`friendly_name`**: Should be changed for easier identification
-
-### 3. What Can Stay the Same
-
-- ✅ **`thread_tlv`**: Use the same TLV for all routers to join them to the same Thread network
-- ✅ All other settings (board, framework, components) can remain identical
-
-### 4. Flash Additional Devices
-
-```bash
-# Fix USB permissions
-sudo chmod 666 /dev/ttyACM0
-
-# Flash second device
-docker-compose exec esphome esphome run /config/Thread/esp32c6-thread-router-2.yaml --device=/dev/ttyACM0
-
-# Flash third device
-docker-compose exec esphome esphome run /config/Thread/esp32c6-thread-router-3.yaml --device=/dev/ttyACM0
-```
+### 2. Flash Additional Devices
 
 Each device will join the same Thread network and act as an independent router, extending your mesh coverage.
 
