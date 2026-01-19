@@ -36,7 +36,7 @@ This ESPHome configuration turns an ESP32-C6 board into a Thread FTD (Full Threa
 
 **✅ Recommended method - via SSH/Terminal:**
 
-**Step 1:** SSH to your Home Assistant (or open Terminal Add-on)
+**Step 1:** SSH to your Server
 
 **Step 2:** Retrieve TLV data:
 ```bash
@@ -91,7 +91,13 @@ That's all you need - no WiFi credentials required!
 
 ### ⚡ Step 2: Compile and Flash Firmware
 
-Connect your ESP32-C6 via USB and flash the firmware.
+Connect your ESP32-C6 via USB and flash the firmware using local ESPHome:
+
+```bash
+esphome run esp32c6-thread-router.yaml --device=/dev/ttyACM0
+```
+
+> **💡 Note:** Replace `/dev/ttyACM0` with your device path (see troubleshooting below)
 
 <details>
 <summary><b>📚 Important Notes & Troubleshooting</b></summary>
@@ -131,6 +137,25 @@ sudo chmod 666 /dev/ttyACM0
 
 > ⚠️ **Note:** You need to run `sudo chmod 666` each time you reconnect the USB device.
 
+</details>
+
+---
+
+<details>
+<summary><b>🐳 Alternative: Using Docker/Podman</b></summary>
+
+> ⚠️ **Important:** When using Docker/Podman (rootless), you need to fix USB permissions before flashing.
+
+```bash
+# 1. Start container
+docker-compose up -d
+
+# 2. Flash the firmware
+docker-compose exec esphome esphome run /config/Thread/esp32c6-thread-router.yaml --device=/dev/ttyACM0
+```
+
+> **📌 Note:** The docker-compose.yml mounts the parent `config/` directory to `/config` in the container. That's why you need `/config/Thread/` in the path above. This is necessary so ESPHome can find the build files in `.esphome/`.
+
 ### 📁 Path Issues (Docker/Podman)
 
 The docker-compose.yml mounts `.../config` (parent directory) to `/config` in the container. This is required so ESPHome finds build files.
@@ -143,30 +168,8 @@ Inside the container, you have two options:
 
 ---
 
-#### 🐳 **Option A: Using Docker/Podman**
-
-> ⚠️ **Important:** When using Docker/Podman (rootless), you need to fix USB permissions before flashing:
-
-```bash
-# 1. Start container
-docker-compose up -d
-
-# 2. Flash the firmware
-docker-compose exec esphome esphome run /config/Thread/esp32c6-thread-router.yaml --device=/dev/ttyACM0
-```
-
-> **📌 Note:** The docker-compose.yml mounts the parent `config/` directory to `/config` in the container. That's why you need `/config/Thread/` in the path above. This is necessary so ESPHome can find the build files in `.esphome/`.
-
----
-
-#### 💻 **Option B: Local ESPHome Installation**
-```bash
-esphome run esp32c6-thread-router.yaml --device=/dev/ttyACM0
-```
-
----
-
-#### 🌐 **Option C: Web Dashboard (GUI)**
+<details>
+<summary><b>🌐 Alternative: Web Dashboard (GUI)</b></summary>
 
 Choose between local or hosted dashboard:
 
@@ -196,49 +199,7 @@ Then open **http://localhost:6052** in your browser and use the web interface.
 
 **Perfect for:** Users who prefer GUI over command line, or quick flashing without local ESPHome installation.
 
-## 🔀 Device Type: FTD vs MTD
-
-| Type | Description | Use Case |
-|------|-------------|----------|
-| **FTD** (Full Thread Device) | Can act as router and connect other devices | ✅ **Recommended for routers** |
-| **MTD** (Minimal Thread Device) | End device, cannot route | 🔋 More power efficient for battery devices |
-
-## 📝 Logging Without WiFi
-
-> **🎉 Good news:** You can log the device over-the-air even with WiFi disabled!
-
-### 📊 Logging Options:
-
-#### 🔌 Option 1: Serial Connection (USB)
-**Always available** - Connect via USB cable
-
----
-
-#### 📡 Option 2: Over Thread Network (OTA)
-**Works without WiFi!**
-```bash
-# Docker/Podman
-docker-compose exec esphome esphome logs /config/Thread/esp32c6-thread-router.yaml
-
-# Local ESPHome
-esphome logs esp32c6-thread-router.yaml
-```
-Choose "Over The Air" when prompted. The device uses its Thread IPv6 address to connect.
-
----
-
-### 🔧 How it works:
-
-The current configuration is optimized for **Thread-only operation:**
-
-| Setting | Purpose |
-|---------|--------|
-| ✅ `api:` | Enables Home Assistant connection over Thread/IPv6 |
-| ✅ `logger:` | Active and works over the API |
-| ✅ `network.enable_ipv6: true` | Enables Thread communication |
-| ✅ WiFi disabled | No interference, lower power consumption |
-
-> **💡 Summary:** Once the ESP32-C6 is connected to Home Assistant via Thread, all logging happens "over the air" through the Thread mesh network - **no WiFi needed!**
+</details>
 
 ## ✅ Verification & Testing
 
@@ -246,10 +207,25 @@ The current configuration is optimized for **Thread-only operation:**
 
 #### 📋 Method 1: View Logs
 
+> **🎉 Good news:** You can view logs over-the-air even with WiFi disabled!
+
+**Logging Options:**
+
+**🔌 Option A: Serial Connection (USB)**
+- Always available - Connect via USB cable
+
+**📡 Option B: Over Thread Network (OTA)**
+- Works without WiFi! The device uses its Thread IPv6 address to connect.
+
 When using Docker/Podman:
 ```bash
 cd /home/tristan/Projects/esphome/config/Thread
 docker-compose exec esphome esphome logs /config/Thread/esp32c6-thread-router.yaml
+```
+
+When using local ESPHome:
+```bash
+esphome logs esp32c6-thread-router.yaml
 ```
 
 Choose "Over The Air" option when prompted. You should see:
