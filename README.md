@@ -196,13 +196,6 @@ Then open **http://localhost:6052** in your browser and use the web interface.
 **📡 Option B: Over Thread Network (OTA)**
 - Works without WiFi! The device uses its Thread IPv6 address to connect.
 
-When using Docker/Podman:
-```bash
-cd /home/tristan/Projects/esphome/config/Thread
-docker-compose exec esphome esphome logs /config/Thread/esp32c6-thread-router.yaml
-```
-
-When using local ESPHome:
 ```bash
 esphome logs esp32c6-thread-router.yaml
 ```
