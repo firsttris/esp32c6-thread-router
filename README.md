@@ -166,18 +166,27 @@ esphome run esp32c6-thread-router.yaml --device=/dev/ttyACM0
 
 ---
 
-#### 🌐 **Option C: ESPHome Dashboard (Web UI)**
+#### 🌐 **Option C: Web Dashboard (GUI)**
 
+Choose between local or hosted dashboard:
+
+**Docker Dashboard:**
+```bash
+# Start container if not already running
+docker-compose up -d
+
+# Start the dashboard
+docker-compose exec esphome esphome dashboard /config
+```
+Then open **http://localhost:6052** in your browser and navigate to the Thread folder.
+
+**Local Dashboard** (requires local ESPHome):
 ```bash
 esphome dashboard .
 ```
+Then open **http://localhost:6052** in your browser and use the web interface.
 
-Then open your browser at **http://localhost:6052** and use the web interface.
-
----
-
-#### 🌐 **Option D: ESPHome Web (Browser-based)**
-
+**Hosted Dashboard** (no installation needed):
 > **🎉 No installation needed!** Flash directly from your browser.
 
 1. Visit **https://web.esphome.io/**
@@ -185,7 +194,7 @@ Then open your browser at **http://localhost:6052** and use the web interface.
 3. Upload your `esp32c6-thread-router.yaml` configuration file
 4. Click "Install" to compile and flash
 
-**Perfect for:** Quick flashing without local ESPHome installation, first-time setup.
+**Perfect for:** Users who prefer GUI over command line, or quick flashing without local ESPHome installation.
 
 ## 🔀 Device Type: FTD vs MTD
 
