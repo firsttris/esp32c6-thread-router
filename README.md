@@ -93,31 +93,6 @@ That's all you need - no WiFi credentials required!
 
 Connect your ESP32-C6 via USB and flash the firmware.
 
----
-
-#### 🐳 **Option A: Using Docker/Podman**
-
-> ⚠️ **Important:** When using Docker/Podman (rootless), you need to fix USB permissions before flashing:
-
-```bash
-# 1. Start container
-docker-compose up -d
-
-# 2. Flash the firmware
-docker-compose exec esphome esphome run /config/Thread/esp32c6-thread-router.yaml --device=/dev/ttyACM0
-```
-
-> **📌 Note:** The docker-compose.yml mounts the parent `config/` directory to `/config` in the container. That's why you need `/config/Thread/` in the path above. This is necessary so ESPHome can find the build files in `.esphome/`.
-
----
-
-#### 💻 **Option B: Local ESPHome Installation**
-```bash
-esphome run esp32c6-thread-router.yaml --device=/dev/ttyACM0
-```
-
----
-
 <details>
 <summary><b>📚 Important Notes & Troubleshooting</b></summary>
 
@@ -164,10 +139,30 @@ Inside the container, you have two options:
 - Use full path: `/config/Thread/esp32c6-thread-router.yaml`
 - OR `cd /config/Thread` first, then use: `esp32c6-thread-router.yaml`
 
-### 📡 OTA Updates
-After initial USB flash, all future updates can be done **wirelessly via Thread!**
-
 </details>
+
+---
+
+#### 🐳 **Option A: Using Docker/Podman**
+
+> ⚠️ **Important:** When using Docker/Podman (rootless), you need to fix USB permissions before flashing:
+
+```bash
+# 1. Start container
+docker-compose up -d
+
+# 2. Flash the firmware
+docker-compose exec esphome esphome run /config/Thread/esp32c6-thread-router.yaml --device=/dev/ttyACM0
+```
+
+> **📌 Note:** The docker-compose.yml mounts the parent `config/` directory to `/config` in the container. That's why you need `/config/Thread/` in the path above. This is necessary so ESPHome can find the build files in `.esphome/`.
+
+---
+
+#### 💻 **Option B: Local ESPHome Installation**
+```bash
+esphome run esp32c6-thread-router.yaml --device=/dev/ttyACM0
+```
 
 ---
 
@@ -341,8 +336,9 @@ Each device will join the same Thread network and act as an independent router, 
 
 <div align="center">
 
-**Made with ❤️ for the Home Assistant Community**
+**Made by the open source community**
 
-*If this helped you, consider starring the repository!* ⭐
+⭐ Star us on [GitHub](https://github.com/firsttris/esp32c6-thread-router) • 🐛 [Report a Bug](https://github.com/firsttris/esp32c6-thread-router/issues) • 💡 [Request a Feature](https://github.com/firsttris/esp32c6-thread-router/issues)
 
 </div>
+
