@@ -1,0 +1,44 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+  schedule:
+    # Weekly, to notice when a new ESPHome release breaks the config
+    - cron: "17 4 * * 1"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install ESPHome
+        run: pip install esphome
+
+      # Dummy secrets: a made-up test dataset and a random key.
+      # The resulting firmware is only built, never published.
+      - name: Create dummy secrets
+        run: |
+          cat > secrets.yaml <<SECRETS
+          thread_tlv: "0e080000000000010000000300000f35060004001fffe0020811111111222222220708fd8f5ea21f1d9e4a0510aabbccddeeff00112233445566778899aa030f4f70656e5468726561642d31323334010212340410aabbccddeeff00112233445566778899aa0c0402a0f7f8"
+          api_encryption_key: "$(openssl rand -base64 32)"
+          SECRETS
+
+      - name: Validate config
+        run: esphome config esp32c6-thread-router.yaml
+
+      - name: Cache PlatformIO
+        uses: actions/cache@v4
+        with:
+          path: ~/.platformio
+          key: platformio-${{ runner.os }}-${{ hashFiles('esp32c6-thread-router.yaml') }}
+          restore-keys: platformio-${{ runner.os }}-
+
+      - name: Compile firmware
+        run: esphome compile esp32c6-thread-router.yaml

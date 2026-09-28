@@ -1,30 +1,103 @@
-# ESPHome Configuration für ESP32-C6 Thread Router
-esphome:
+# ESPHome configuration for an ESP32-C6 Thread router (FTD)
+#
+# Required secrets (secrets.yaml): thread_tlv, api_encryption_key
+# See README.md for details.
+
+substitutions:
   name: esp32c6-thread-router
   friendly_name: ESP32-C6 Thread Router
+  # Seeed XIAO ESP32C6 antenna at boot, can be changed in Home Assistant later.
+  # RESTORE_DEFAULT_OFF = built-in ceramic antenna, RESTORE_DEFAULT_ON = external U.FL/SMA antenna
+  antenna_default: RESTORE_DEFAULT_OFF
 
-# ESP32-C6 Board Konfiguration mit ESP-IDF Framework (erforderlich für Thread)
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+
+# ESP-IDF is required for OpenThread
 esp32:
   board: esp32-c6-devkitm-1
   framework:
     type: esp-idf
 
-# Logger für Debugging
 logger:
 
-# API für Home Assistant Verbindung
 api:
+  encryption:
+    key: !secret api_encryption_key
 
-# OTA Updates
+# OTA uploads are encrypted and authenticated with the API encryption key
 ota:
   - platform: esphome
+    encryption: {}
 
-# IPv6 aktivieren (erforderlich für Thread)
+# Thread is IPv6-only
 network:
   enable_ipv6: true
 
-# OpenThread Konfiguration
 openthread:
-  device_type: FTD  # Full Thread Device = Router
+  device_type: FTD  # Full Thread Device: router-eligible
   tlv: !secret thread_tlv
+  # Stored dataset in flash wins over `tlv` by default. Uncomment once after
+  # your Thread network was recreated so the new TLV is applied (see README).
+  # force_dataset: true
+  # Transmit power, ESP32-C6 allows -15..20 dBm. Respect your local regulatory limits.
+  # output_power: 10dBm
 
+# --- Seeed XIAO ESP32C6 specific (remove this block for other boards) ---
+# GPIO3 LOW powers the RF switch, GPIO14 selects the antenna (LOW = built-in, HIGH = external).
+switch:
+  - platform: gpio
+    id: rf_switch_power
+    pin:
+      number: GPIO3
+      inverted: true
+    restore_mode: ALWAYS_ON
+    internal: true
+  - platform: gpio
+    name: External Antenna
+    pin: GPIO14
+    restore_mode: ${antenna_default}
+    entity_category: config
+    icon: mdi:antenna
+
+# User LED (active low): blinks on warnings/errors, off when healthy
+status_led:
+  pin:
+    number: GPIO15
+    inverted: true
+    ignore_strapping_warning: true
+# --- end of XIAO specific block ---
+
+button:
+  - platform: restart
+    name: Restart
+
+text_sensor:
+  - platform: openthread_info
+    role:
+      name: Thread Role
+    rloc16:
+      name: Thread RLOC16
+    channel:
+      name: Thread Channel
+    ip_address:
+      name: Thread IP Address
+
+sensor:
+  - platform: uptime
+    name: Uptime
+  - platform: openthread_info
+    # Parent values are only meaningful while the device is a child/REED, not once it is a router
+    parent_average_rssi:
+      name: Thread Parent RSSI
+      update_interval: 60s
+    tx_retries:
+      name: Thread TX Retries
+      update_interval: 60s
+    tx_err_cca:
+      name: Thread TX CCA Errors
+      update_interval: 60s
+    partition_id_changes:
+      name: Thread Partition Changes
+      update_interval: 60s
