@@ -358,8 +358,9 @@ All devices share the same `secrets.yaml` (same TLV = same Thread network). Chan
 
 <div align="center">
 
-**Made by the open source community**
+⭐ Like the ESP32-C6 Thread Router? A [star on GitHub](https://github.com/firsttris/esp32c6-thread-router) helps others find it.<br>
+🐛 [Report a bug](https://github.com/firsttris/esp32c6-thread-router/issues/new) · 💡 [Request a feature](https://github.com/firsttris/esp32c6-thread-router/issues/new)
 
-⭐ Star us on [GitHub](https://github.com/firsttris/esp32c6-thread-router) • 🐛 [Report a Bug](https://github.com/firsttris/esp32c6-thread-router/issues) • 💡 [Request a Feature](https://github.com/firsttris/esp32c6-thread-router/issues)
+<sub>License: <a href="LICENSE">MIT</a> · © Tristan Teufel and contributors</sub>
 
 </div>
