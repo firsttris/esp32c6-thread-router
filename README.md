@@ -43,9 +43,21 @@ This ESPHome configuration turns an ESP32-C6 board into a Thread FTD (Full Threa
 
 > **💡 Important:** The TLV contains ALL network parameters - you don't need to generate or enter anything manually!
 
+> **🧭 Which network is the right one?** The network of your OpenThread Border Router (OTBR) is not automatically the one your devices are in. Devices paired via Google Home, Apple Home or Alexa usually live in the network of a Google TV Streamer, Nest Hub, HomePod or Echo. Use the *preferred network* under **Settings → Devices & Services → Thread**.
+>
+> **Recommendation: bring everything into one network.** Either let the OTBR join the other network via the *Open Thread Border Router* integration in Home Assistant (first import the credentials from your phone via the Companion App, then click *Add to preferred network* for the OTBR on the Thread page), or re-pair your devices through Home Assistant.
+
 #### 📥 Retrieve TLV from existing Thread network:
 
-**✅ Recommended method - via SSH/Terminal:**
+**✅ Easiest method - via Home Assistant:**
+
+1. Go to **Settings → Devices & Services → Thread**
+2. Click the **ⓘ** icon next to your preferred network
+3. Copy the hex string shown under **Active dataset TLVs**
+
+> **💡 This always gives you Home Assistant's preferred network**, even if your border router is not an OTBR (e.g. a Google or Apple device).
+
+**🖥️ Alternative - via SSH/Terminal:**
 
 **Step 1:** SSH to your Server
 
@@ -56,12 +68,7 @@ docker exec otbr ot-ctl dataset active -x
 
 **Step 3:** Copy the hex string (e.g., `0e080000000000010000...`)
 
-**Step 4:** Add to `secrets.yaml`:
-```yaml
-thread_tlv: "YOUR_TLV_HEX_HERE"
-```
-
-**🎉 That's it!** The TLV contains:
+Put it into `secrets.yaml` (see [Installation, Step 1](#-step-1-configure-secrets)). The TLV contains:
 
 <table>
 <tr><td>✅ Channel</td><td>✅ Network Name</td><td>✅ PAN ID & Extended PAN ID</td></tr>
@@ -79,15 +86,6 @@ openssl rand -base64 32
 ```
 
 Or copy a freshly generated key from the [ESPHome API docs](https://esphome.io/components/api/).
-
-### 📄 3. ESPHome Secrets
-
-In `secrets.yaml` you need:
-
-| Key | Description | Required |
-|-----|-------------|----------|
-| **thread_tlv** | Your Thread network dataset (hex) | ✅ Required |
-| **api_encryption_key** | 32-byte base64 key for API and OTA encryption | ✅ Required |
 
 ## 🚀 Installation
 
@@ -124,6 +122,16 @@ esphome run esp32c6-thread-router.yaml --device=/dev/ttyACM0
 ```
 
 > **💡 Note:** Replace `/dev/ttyACM0` with your device path (see troubleshooting below)
+
+### 🔄 Updating Later (OTA over Thread)
+
+After the first USB flash, updates go over the air via Thread, no USB cable needed:
+
+```bash
+esphome run esp32c6-thread-router.yaml --device esp32c6-thread-router.local
+```
+
+Works as long as your border routers route the Thread network into your LAN (IPv6). After a network change you need USB once, see [Thread Network Was Recreated](#-thread-network-was-recreated--tlv-changed--networks-merged).
 
 <details>
 <summary><b>📚 Important Notes & Troubleshooting</b></summary>
@@ -165,6 +173,8 @@ docker compose restart
 ```
 
 > ⚠️ **Note:** You need to run `sudo chmod 666` each time you reconnect the USB device.
+
+**Distrobox/Toolbox:** `distrobox-host-exec sudo setfacl -m u:$USER:rw /dev/ttyACM0`
 
 </details>
 
@@ -213,7 +223,7 @@ Then open **http://localhost:6052** in your browser and use the web interface.
 web.esphome.io can only **flash** a finished firmware file. It cannot compile your YAML. Because the TLV is compiled into the firmware, you have to build it yourself first:
 
 1. Compile locally: `esphome compile esp32c6-thread-router.yaml`
-2. The firmware is written to `.esphome/build/esp32c6-thread-router/.pioenvs/esp32c6-thread-router/firmware.factory.bin`
+2. The firmware is written to `.esphome/build/esp32c6-thread-router/build/firmware.factory.bin`
 3. Open **https://web.esphome.io/** in Chrome or Edge, click "Connect", choose your ESP32-C6 and select "Install"
 4. Upload the `firmware.factory.bin` file
 
@@ -225,22 +235,12 @@ web.esphome.io can only **flash** a finished firmware file. It cannot compile yo
 
 #### 📋 Method 1: View Logs
 
-> **🎉 Good news:** You can view logs over-the-air even with WiFi disabled!
-
-**Logging Options:**
-
-**🔌 Option A: Serial Connection (USB)**
-- Always available - Connect via USB cable
-
-**📡 Option B: Over Thread Network (OTA)**
-- Works without WiFi! The device uses its Thread IPv6 address to connect.
-
 ```bash
 esphome logs esp32c6-thread-router.yaml
 ```
 
-Choose "Over The Air" option when prompted. You should see:
-- IPv6 address like `fd3d:8f96:a13d:1:...` (Thread mesh-local address)
+Choose USB or "Over The Air" when prompted. You should see:
+- IPv6 address like `fdxx:xxxx:xxxx:1:...` (routable address in the Thread network's OMR prefix)
 - `[openthread:xxx] Device Type: FTD`
 - No continuous error messages
 
@@ -266,6 +266,7 @@ docker exec otbr ot-ctl state
 - Add it to Home Assistant (use `esp32c6-thread-router.local` or IPv6 address)
 - Enter the `api_encryption_key` from your `secrets.yaml` when asked
 - Check device status - should show "Online"
+- Re-flashed with a new key? Home Assistant asks for the new key. If the entry is stale, delete it and add the device again.
 
 ## 📊 Diagnostics in Home Assistant
 
@@ -298,15 +299,25 @@ openthread:
 
 > ⚠️ Respect the regulatory limits for 2.4 GHz in your country. More power only helps if the other devices can also reach the router, since Thread links are bidirectional.
 
-### 🔄 Thread Network Was Recreated / TLV Changed
+### 🔄 Thread Network Was Recreated / TLV Changed / Networks Merged
 
-The router stores the Thread dataset in flash after the first start and then **ignores** the `tlv` from the config. If you recreate your Thread network or change the TLV, the router stays in the old network.
+The router stores the Thread dataset in flash after the first start and then **ignores** the `tlv` from the config. If the dataset of your network changes, the router stays in the old network. This happens when you:
+
+- recreate your Thread network
+- let Home Assistant's OTBR join another network, e.g. the Google or Apple network (**most common cause**, see [Which network is the right one?](#-1-thread-network-dataset-tlv))
+- switch the preferred network in Home Assistant
+
+> ⚠️ **OTA over Thread no longer works after a network change.** The router stays in the old network, which no longer has a border router, so it has no reachable IPv6 address. You have to flash the new TLV **via USB**, just like the first installation.
+
+**Symptoms:** the device is *unavailable* in Home Assistant, `ping` to its address fails with `Network is unreachable`, and the address prefix stored in Home Assistant no longer shows up in `ip -6 route`.
+
+To check which network the router is in, compare the network name / Extended PAN ID of your `thread_tlv` with the one in **Settings → Devices & Services → Thread**.
 
 To apply a new TLV:
 
-1. Update `thread_tlv` in `secrets.yaml`
-2. Uncomment `force_dataset: true` in the `openthread:` section and flash
-3. Once the router has joined, comment it out again and flash once more
+1. Copy the current TLV (see [Retrieve TLV](#-retrieve-tlv-from-existing-thread-network)) into `thread_tlv` in `secrets.yaml`
+2. Uncomment `force_dataset: true` in the `openthread:` section and flash via USB
+3. Once the router has joined, comment it out again and flash once more (now via OTA)
 
 > **💡 Why not keep `force_dataset: true` permanently?** The Thread network can change its dataset at runtime, e.g. when Home Assistant moves it to another channel. With `force_dataset: true` the router would fall back to the old dataset from the config after every reboot.
 
@@ -331,6 +342,8 @@ esphome run esp32c6-thread-router-2.yaml --device=/dev/ttyACM0
 
 All devices share the same `secrets.yaml` (same TLV = same Thread network). Changes to the main config apply to all devices on the next flash. Each device will join the same Thread network and act as an independent router, extending your mesh coverage.
 
+> **🔎 Which board is connected?** Check the MAC before flashing and compare it with *Device info* in Home Assistant: `esptool --port /dev/ttyACM0 read-mac`. On Linux it also works without port permissions: `cat /sys/class/tty/ttyACM0/device/../serial`
+
 ## 📂 File Structure
 
 ```
@@ -341,6 +354,8 @@ All devices share the same `secrets.yaml` (same TLV = same Thread network). Chan
 ├── docker-compose.yml            # Optional: ESPHome in Docker/Podman
 ├── .github/workflows/            # CI: validates and compiles the config
 ├── .gitignore                    # Excludes secrets and build artifacts
+├── thread-router-image.jpg       # Image used in this README
+├── LICENSE                       # MIT license
 └── README.md                     # This file
 ```
 
