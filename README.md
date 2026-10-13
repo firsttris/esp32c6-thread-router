@@ -195,6 +195,9 @@ ESPHOME_DEVICE=/dev/ttyUSB0 docker compose up -d
 
 # 2. Flash the firmware
 docker compose exec esphome esphome run /config/esp32c6-thread-router.yaml --device=/dev/ttyACM0
+
+# Update over the air (Thread)
+docker compose exec esphome esphome run /config/esp32c6-thread-router.yaml --device esp32c6-thread-router.local
 ```
 
 </details>
