@@ -131,7 +131,7 @@ After the first USB flash, updates go over the air via Thread, no USB cable need
 esphome run esp32c6-thread-router.yaml --device esp32c6-thread-router.local
 ```
 
-Works as long as your border routers route the Thread network into your LAN (IPv6). After a network change you need USB once, see [Thread Network Was Recreated](#-thread-network-was-recreated--tlv-changed--networks-merged).
+Works as long as your border routers route the Thread network into your LAN (IPv6). Over Thread an update takes a few minutes. After a network change you need USB once, see [Thread Network Was Recreated](#-thread-network-was-recreated--tlv-changed--networks-merged).
 
 <details>
 <summary><b>📚 Important Notes & Troubleshooting</b></summary>
@@ -195,9 +195,11 @@ ESPHOME_DEVICE=/dev/ttyUSB0 docker compose up -d
 
 # 2. Flash the firmware
 docker compose exec esphome esphome run /config/esp32c6-thread-router.yaml --device=/dev/ttyACM0
+```
 
-# Update over the air (Thread)
-docker compose exec esphome esphome run /config/esp32c6-thread-router.yaml --device esp32c6-thread-router.local
+**Update over the air (Thread)** - no USB needed, runs a one-off container without the USB device:
+```bash
+docker run --rm -it --network host -v "$PWD":/config ghcr.io/esphome/esphome:stable run esp32c6-thread-router.yaml --device esp32c6-thread-router.local
 ```
 
 </details>
@@ -267,6 +269,7 @@ docker exec otbr ot-ctl state
 - Go to **Settings → Devices & Services**
 - The ESP32-C6 should appear as a discovered device
 - Add it to Home Assistant (use `esp32c6-thread-router.local` or IPv6 address)
+- Home Assistant needs IPv6 and host networking (Docker) to reach Thread devices
 - Enter the `api_encryption_key` from your `secrets.yaml` when asked
 - Check device status - should show "Online"
 - Re-flashed with a new key? Home Assistant asks for the new key. If the entry is stale, delete it and add the device again.
