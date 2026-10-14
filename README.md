@@ -9,6 +9,8 @@
 [![ESPHome](https://img.shields.io/badge/ESPHome-2026.8%2B-blue?logo=esphome)](https://esphome.io/)
 [![Thread](https://img.shields.io/badge/Thread-1.3-green)](https://www.threadgroup.org/)
 [![Home Assistant](https://img.shields.io/badge/Home%20Assistant-Integration-41BDF5?logo=homeassistant)](https://www.home-assistant.io/)
+[![Build](https://github.com/firsttris/esp32c6-thread-router/actions/workflows/build.yml/badge.svg)](https://github.com/firsttris/esp32c6-thread-router/actions/workflows/build.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 This ESPHome configuration turns an ESP32-C6 board into a Thread FTD (Full Thread Device) router that seamlessly integrates with Home Assistant to expand your Thread mesh network and improve connectivity for your Thread devices.
 
