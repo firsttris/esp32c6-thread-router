@@ -294,6 +294,22 @@ The device exposes these diagnostic entities:
 
 More sensors (link quality, RX/TX totals, attach attempts, ...) are available in the [openthread_info](https://esphome.io/components/text_sensor/openthread_info/) component and can be added to the `sensor:` section.
 
+## 📈 Watch Your Thread Mesh Over Time
+
+The `ot-ctl` output and the diagnostic entities above show the mesh right now.
+[Funkloch](https://github.com/firsttris/funkloch) (German for *dead spot*) asks your OpenThread
+Border Router for its diagnostics and keeps the history, so you see what the new router changed:
+
+- **Signal history**: the RSSI of every Thread device over days and weeks, not one snapshot.
+- **Mesh map**: which routers are linked and how each device reaches the border router.
+- **Placement check**: move the ESP32-C6, wait a day, compare. No more guessing.
+- **Early warning**: a traffic light and trend per device, and a notification (ntfy, webhook,
+  MQTT) when one drops out.
+
+One Docker container next to your OpenThread Border Router (it reads the OTBR REST API, so
+Apple, Google or Eve border routers won't do), read-only, no cloud:
+[Thread setup](https://firsttris.github.io/funkloch/thread.html).
+
 ## ⚙️ Advanced Options
 
 ### 📶 Transmit Power
@@ -376,6 +392,7 @@ All devices share the same `secrets.yaml` (same TLV = same Thread network). Chan
 | 📡 [Seeed XIAO ESP32C6 Wiki](https://wiki.seeedstudio.com/xiao_esp32c6_getting_started/) | Pinout and RF switch of the XIAO ESP32C6 |
 | 🔗 [OpenThread Primer](https://openthread.io/guides/thread-primer/) | Learn the basics of Thread networking |
 | 🏠 [Home Assistant Thread Integration](https://www.home-assistant.io/integrations/thread/) | How Thread works in Home Assistant |
+| 📈 [Funkloch](https://github.com/firsttris/funkloch) | Signal history, mesh map and alerts for Thread and Zigbee2MQTT devices |
 
 ---
 
