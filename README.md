@@ -4,7 +4,7 @@
 
 **Extend Your Thread Network Coverage with an Affordable ESP32-C6!**
 
-<img src="./thread-router-image.jpg" alt="ESP32-C6 Thread Router" width="600">
+<img src="./thread-router-image.jpg" alt="Seeed XIAO ESP32C6 as a Thread router in a 3D-printed case with an external SMA antenna" width="600">
 
 [![ESPHome](https://img.shields.io/badge/ESPHome-2026.8%2B-blue?logo=esphome)](https://esphome.io/)
 [![Thread](https://img.shields.io/badge/Thread-1.3-green)](https://www.threadgroup.org/)
@@ -12,7 +12,7 @@
 [![Build](https://github.com/firsttris/esp32c6-thread-router/actions/workflows/build.yml/badge.svg)](https://github.com/firsttris/esp32c6-thread-router/actions/workflows/build.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-This ESPHome configuration turns an ESP32-C6 board into a Thread FTD (Full Thread Device) router that seamlessly integrates with Home Assistant to expand your Thread mesh network and improve connectivity for your Thread devices.
+This ESPHome configuration turns a ~5 € ESP32-C6 board into a **Thread 1.3 router** (FTD, Full Thread Device) for **Home Assistant**. Thread is the network under **Matter**, so it extends the mesh for your Matter-over-Thread devices too. No WiFi needed, with diagnostics and OTA updates over Thread.
 
 ---
 
@@ -176,7 +176,15 @@ docker compose restart
 
 > ⚠️ **Note:** You need to run `sudo chmod 666` each time you reconnect the USB device.
 
-**Distrobox/Toolbox:** `distrobox-host-exec sudo setfacl -m u:$USER:rw /dev/ttyACM0`
+**Inside a Distrobox/Toolbox container:** the device shows up as `nobody:nogroup` and `sudo` inside the box can't change it. Run the `chmod` on the host, e.g. `distrobox-host-exec sudo chmod 666 /dev/ttyACM0`.
+
+**SELinux (Fedora) with rootless Podman:** even with `chmod 666`, the container may get `Permission denied` on the serial port. Disable SELinux labeling for the container (`security_opt: label=disable`, already set in `docker-compose.yml`), or with `podman run`:
+
+```bash
+podman run --rm --security-opt label=disable -v "$PWD":/config \
+  --device /dev/ttyACM0 ghcr.io/esphome/esphome:stable \
+  run esp32c6-thread-router.yaml --device /dev/ttyACM0
+```
 
 </details>
 
@@ -345,6 +353,32 @@ To apply a new TLV:
 
 > **💡 Why not keep `force_dataset: true` permanently?** The Thread network can change its dataset at runtime, e.g. when Home Assistant moves it to another channel. With `force_dataset: true` the router would fall back to the old dataset from the config after every reboot.
 
+## ❓ FAQ
+
+### Does it work with Matter devices?
+
+Yes. Matter-over-Thread devices (Eve, Nanoleaf, IKEA, Aqara, ...) talk over the Thread mesh, and this router relays their traffic like any other Thread router. The router itself is not a Matter device: it shows up in Home Assistant through the ESPHome integration.
+
+### Does it work with Apple, Google or Amazon border routers?
+
+Yes, as long as the router gets the dataset (TLV) of the network your devices are in, see [Which network is the right one?](#-1-thread-network-dataset-tlv). For the Home Assistant connection and OTA updates the border routers have to route the Thread network into your LAN (IPv6).
+
+### Can the ESP32-C6 be a Thread border router?
+
+Not with this config. It is a router inside the mesh and needs a border router (e.g. OpenThread Border Router in Home Assistant, a HomePod, Nest Hub or Echo) to reach your LAN.
+
+### Why is it a child and not a router?
+
+A new FTD first joins as a child (REED). Thread promotes it to router only when the mesh needs one, see [Check Thread Network](#-method-2-check-thread-network). The **Thread Role** sensor shows the current role.
+
+### ESP32-C6 or ESP32-H2?
+
+Both work with ESPHome's OpenThread component, and so do the ESP32-C5 and nRF52 boards. This config is only tested on the ESP32-C6, see [Other boards](#-prerequisites).
+
+### Can the same board run Thread and Zigbee at the same time?
+
+No. The ESP32-C6 has one 802.15.4 radio, and a firmware uses it for either Thread or Zigbee. For Zigbee, flash the [ESP32-C6 Zigbee Router](https://github.com/firsttris/esp32c6-zigbee-router) instead.
+
 ## 🔀 Multiple Thread Routers
 
 To flash multiple ESP32-C6 devices and use them as separate routers in the same Thread network, create a small file per additional device (e.g. `esp32c6-thread-router-2.yaml`) that reuses the main config:
@@ -373,8 +407,8 @@ All devices share the same `secrets.yaml` (same TLV = same Thread network). Chan
 ```
 .
 ├── esp32c6-thread-router.yaml    # Main ESPHome configuration
-├── esp32c6-thread-router-2.yaml  # Optional: second router (includes the main config)
-├── secrets.yaml                  # Shared secrets (not in git)
+├── esp32c6-thread-router-2.yaml  # Optional: second router you create (not in git)
+├── secrets.yaml                  # Shared secrets you create (not in git)
 ├── docker-compose.yml            # Optional: ESPHome in Docker/Podman
 ├── .github/workflows/            # CI: validates and compiles the config
 ├── .gitignore                    # Excludes secrets and build artifacts

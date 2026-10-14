@@ -12,4 +12,7 @@ services:
       - ${ESPHOME_DEVICE:-/dev/ttyACM0}:${ESPHOME_DEVICE:-/dev/ttyACM0}
     # Host networking is needed for mDNS discovery and the dashboard on port 6052
     network_mode: host
+    # Rootless Podman on SELinux systems (Fedora) blocks the serial port otherwise
+    security_opt:
+      - label=disable
     restart: unless-stopped
