@@ -33,7 +33,7 @@ This ESPHome configuration turns a ~5 € ESP32-C6 board into a **Thread 1.3 rou
 |-------------|-------------|
 | **🔧 Hardware** | ESP32-C6 board (tested with [Seeed Studio XIAO ESP32C6](https://www.seeedstudio.com/Seeed-Studio-XIAO-ESP32C6-p-5884.html)) |
 | **🌐 Network** | Thread Border Router in network (e.g., Home Assistant with Thread integration) |
-| **💻 Software** | ESPHome **2026.8 or newer** (required for the Thread diagnostic sensors) |
+| **💻 Software** | ESPHome **2026.8 or newer** (required for the Thread diagnostic sensors). CI builds with the release pinned in [`requirements.txt`](requirements.txt) (`pip install -r requirements.txt`), and `docker-compose.yml` runs the same one; Renovate updates both |
 | **🔌 Cable** | USB cable for initial flashing |
 | **📦 Optional** | 3D-printed case - [XIAO ESP32-C6 Case](https://www.printables.com/model/1543275-xiao-esp32-c6-zigbee-router-case-split-lid-sma-ext) |
 
@@ -182,7 +182,7 @@ docker compose restart
 
 ```bash
 podman run --rm --security-opt label=disable -v "$PWD":/config \
-  --device /dev/ttyACM0 ghcr.io/esphome/esphome:stable \
+  --device /dev/ttyACM0 ghcr.io/esphome/esphome:2026.10.1 \
   run esp32c6-thread-router.yaml --device /dev/ttyACM0
 ```
 
@@ -209,7 +209,7 @@ docker compose exec esphome esphome run /config/esp32c6-thread-router.yaml --dev
 
 **Update over the air (Thread)** - no USB needed, runs a one-off container without the USB device:
 ```bash
-docker run --rm -it --network host -v "$PWD":/config ghcr.io/esphome/esphome:stable run esp32c6-thread-router.yaml --device esp32c6-thread-router.local
+docker run --rm -it --network host -v "$PWD":/config ghcr.io/esphome/esphome:2026.10.1 run esp32c6-thread-router.yaml --device esp32c6-thread-router.local
 ```
 
 </details>
@@ -410,6 +410,7 @@ All devices share the same `secrets.yaml` (same TLV = same Thread network). Chan
 ├── esp32c6-thread-router-2.yaml  # Optional: second router you create (not in git)
 ├── secrets.yaml                  # Shared secrets you create (not in git)
 ├── docker-compose.yml            # Optional: ESPHome in Docker/Podman
+├── requirements.txt              # The pinned ESPHome release (CI, pip)
 ├── .github/workflows/            # CI: validates and compiles the config
 ├── .gitignore                    # Excludes secrets and build artifacts
 ├── thread-router-image.jpg       # Image used in this README
