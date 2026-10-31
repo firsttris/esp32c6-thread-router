@@ -27,9 +27,9 @@ jobs:
     if: ${{ !github.event.pull_request.draft }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         id: python
         with:
           python-version: "3.12"
@@ -37,7 +37,7 @@ jobs:
       # ESPHome is pinned in requirements.txt; the cache saves downloading and
       # building the wheels and rolls over with a new pin
       - name: Cache pip
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/pip
           key: pip-${{ runner.os }}-py${{ steps.python.outputs.python-version }}-${{ hashFiles('requirements.txt') }}
@@ -65,7 +65,7 @@ jobs:
       # and the IDF Python env live in ~/.cache/esphome. That env links to the
       # runner's Python, so the key includes the Python and ESPHome version.
       - name: Cache ESP-IDF toolchain
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/esphome
           key: esphome-idf-${{ runner.os }}-py${{ steps.python.outputs.python-version }}-${{ steps.esphome.outputs.version }}
@@ -74,7 +74,7 @@ jobs:
       # build): ninja then only recompiles what changed. secrets.yaml lives
       # next to the config, not in .esphome/, and is not cached.
       - name: Cache build directory
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: .esphome
           key: esphome-build-${{ runner.os }}-py${{ steps.python.outputs.python-version }}-${{ steps.esphome.outputs.version }}-${{ hashFiles('esp32c6-thread-router.yaml') }}
