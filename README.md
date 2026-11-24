@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🔗 ESP32-C6 Thread Router
+# ESP32-C6 Thread Router
 
 **Extend Your Thread Network Coverage with an Affordable ESP32-C6!**
 
@@ -18,7 +18,7 @@ This ESPHome configuration turns a ~5 € ESP32-C6 board into a **Thread 1.3 rou
 
 </div>
 
-## ✨ Features
+## Features
 
 - 📶 **Thread router (FTD)**: extends your Thread mesh, no WiFi needed
 - 🔐 **Encrypted API and OTA**: Home Assistant connection and firmware updates use one encryption key
@@ -27,7 +27,7 @@ This ESPHome configuration turns a ~5 € ESP32-C6 board into a **Thread 1.3 rou
 - 💡 **Status LED**: blinks when something is wrong
 - 🔁 **Restart button** in Home Assistant
 
-## 📋 Prerequisites
+## Prerequisites
 
 | Requirement | Description |
 |-------------|-------------|
@@ -35,11 +35,11 @@ This ESPHome configuration turns a ~5 € ESP32-C6 board into a **Thread 1.3 rou
 | **🌐 Network** | Thread Border Router in network (e.g., Home Assistant with Thread integration) |
 | **💻 Software** | ESPHome **2026.8 or newer** (required for the Thread diagnostic sensors). CI builds with the release pinned in [`requirements.txt`](requirements.txt) (`pip install -r requirements.txt`), and `docker-compose.yml` runs the same one; Renovate updates both |
 | **🔌 Cable** | USB cable for initial flashing |
-| **📦 Optional** | 3D-printed case, see [3D-Printed Case](#-3d-printed-case) |
+| **📦 Optional** | 3D-printed case, see [3D-Printed Case](#3d-printed-case) |
 
 > **💡 Other boards:** The config also works on other ESP32-C6 boards. Remove the block marked `Seeed XIAO ESP32C6 specific` in `esp32c6-thread-router.yaml`, since it drives GPIO3, GPIO14 and GPIO15. ESPHome also supports Thread on ESP32-C5, ESP32-H2 and (since 2026.7) nRF52 boards, but this config is only tested on the ESP32-C6.
 
-## 📦 3D-Printed Case
+## 3D-Printed Case
 
 The case in the picture above is made for the Seeed Studio XIAO ESP32C6 **without pin headers** and an external SMA antenna. It measures 25.8 × 36.5 × 14 mm, snaps together without screws and has a keyhole in the back for wall mounting. Reset and BOOT are reachable with a paper clip through the two larger holes, and the two smaller holes show the LEDs.
 
@@ -62,7 +62,7 @@ The case used here before is larger and leaves more room for the pigtail: [XIAO 
 
 </details>
 
-## 🔑 Required Information
+## Required Information
 
 ### 🌐 1. Thread Network Dataset (TLV)
 
@@ -112,7 +112,7 @@ openssl rand -base64 32
 
 Or copy a freshly generated key from the [ESPHome API docs](https://esphome.io/components/api/).
 
-## 🚀 Installation
+## Installation
 
 ### 📝 Step 1: Configure Secrets
 
@@ -267,7 +267,7 @@ web.esphome.io can only **flash** a finished firmware file. It cannot compile yo
 
 </details>
 
-## ✅ Verification & Testing
+## Verification & Testing
 
 ### 🔍 Check if Thread Router is working:
 
@@ -307,7 +307,7 @@ docker exec otbr ot-ctl state
 - Check device status - should show "Online"
 - Re-flashed with a new key? Home Assistant asks for the new key. If the entry is stale, delete it and add the device again.
 
-## 📊 Diagnostics in Home Assistant
+## Diagnostics in Home Assistant
 
 The device exposes these diagnostic entities:
 
@@ -325,7 +325,7 @@ The device exposes these diagnostic entities:
 
 More sensors (link quality, RX/TX totals, attach attempts, ...) are available in the [openthread_info](https://esphome.io/components/text_sensor/openthread_info/) component and can be added to the `sensor:` section.
 
-## 📈 Watch Your Thread Mesh Over Time
+## Watch Your Thread Mesh Over Time
 
 The `ot-ctl` output and the diagnostic entities above show the mesh right now.
 [Funkloch](https://github.com/firsttris/funkloch) (German for *dead spot*) asks your OpenThread
@@ -341,7 +341,7 @@ One Docker container next to your OpenThread Border Router (it reads the OTBR RE
 Apple, Google or Eve border routers won't do), read-only, no cloud:
 [Thread setup](https://firsttris.github.io/funkloch/thread.html).
 
-## ⚙️ Advanced Options
+## Advanced Options
 
 ### 📶 Transmit Power
 
@@ -376,7 +376,7 @@ To apply a new TLV:
 
 > **💡 Why not keep `force_dataset: true` permanently?** The Thread network can change its dataset at runtime, e.g. when Home Assistant moves it to another channel. With `force_dataset: true` the router would fall back to the old dataset from the config after every reboot.
 
-## ❓ FAQ
+## FAQ
 
 ### Does it work with Matter devices?
 
@@ -396,13 +396,13 @@ A new FTD first joins as a child (REED). Thread promotes it to router only when 
 
 ### ESP32-C6 or ESP32-H2?
 
-Both work with ESPHome's OpenThread component, and so do the ESP32-C5 and nRF52 boards. This config is only tested on the ESP32-C6, see [Other boards](#-prerequisites).
+Both work with ESPHome's OpenThread component, and so do the ESP32-C5 and nRF52 boards. This config is only tested on the ESP32-C6, see [Other boards](#prerequisites).
 
 ### Can the same board run Thread and Zigbee at the same time?
 
 No. The ESP32-C6 has one 802.15.4 radio, and a firmware uses it for either Thread or Zigbee. For Zigbee, flash the [ESP32-C6 Zigbee Router](https://github.com/firsttris/esp32c6-zigbee-router) instead.
 
-## 🔀 Multiple Thread Routers
+## Multiple Thread Routers
 
 To flash multiple ESP32-C6 devices and use them as separate routers in the same Thread network, create a small file per additional device (e.g. `esp32c6-thread-router-2.yaml`) that reuses the main config:
 
@@ -425,7 +425,7 @@ All devices share the same `secrets.yaml` (same TLV = same Thread network). Chan
 
 > **🔎 Which board is connected?** Check the MAC before flashing and compare it with *Device info* in Home Assistant: `esptool --port /dev/ttyACM0 read-mac`. On Linux it also works without port permissions: `cat /sys/class/tty/ttyACM0/device/../serial`
 
-## 📂 File Structure
+## File Structure
 
 ```
 .
@@ -442,7 +442,7 @@ All devices share the same `secrets.yaml` (same TLV = same Thread network). Chan
 └── README.md                     # This file
 ```
 
-## 📚 Further Resources
+## Further Resources
 
 | Resource | Description |
 |----------|-------------|
