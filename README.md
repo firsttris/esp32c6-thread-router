@@ -6,13 +6,13 @@
 
 <img src="./thread-router-image.jpg" alt="Seeed XIAO ESP32C6 as a Thread router in a 3D-printed case with an external SMA antenna" width="600">
 
-[![ESPHome](https://img.shields.io/badge/ESPHome-2026.8%2B-blue?logo=esphome)](https://esphome.io/)
-[![Thread](https://img.shields.io/badge/Thread-1.3-green)](https://www.threadgroup.org/)
+[![ESPHome](https://img.shields.io/badge/ESPHome-2026.9%2B-blue?logo=esphome)](https://esphome.io/)
+[![Thread](https://img.shields.io/badge/Thread-1.4-green)](https://www.threadgroup.org/)
 [![Home Assistant](https://img.shields.io/badge/Home%20Assistant-Integration-41BDF5?logo=homeassistant)](https://www.home-assistant.io/)
 [![Build](https://github.com/firsttris/esp32c6-thread-router/actions/workflows/build.yml/badge.svg)](https://github.com/firsttris/esp32c6-thread-router/actions/workflows/build.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-This ESPHome configuration turns a ~5 € ESP32-C6 board into a **Thread 1.3 router** (FTD, Full Thread Device) for **Home Assistant**. Thread is the network under **Matter**, so it extends the mesh for your Matter-over-Thread devices too. No WiFi needed, with diagnostics and OTA updates over Thread.
+This ESPHome configuration turns a ~5 € ESP32-C6 board into a **Thread 1.4 router** (FTD, Full Thread Device) for **Home Assistant**. Thread is the network under **Matter**, so it extends the mesh for your Matter-over-Thread devices too. No WiFi needed, with diagnostics and OTA updates over Thread.
 
 ---
 
@@ -33,7 +33,7 @@ This ESPHome configuration turns a ~5 € ESP32-C6 board into a **Thread 1.3 rou
 |-------------|-------------|
 | **🔧 Hardware** | ESP32-C6 board (tested with [Seeed Studio XIAO ESP32C6](https://www.seeedstudio.com/Seeed-Studio-XIAO-ESP32C6-p-5884.html)) |
 | **🌐 Network** | Thread Border Router in network (e.g., Home Assistant with Thread integration) |
-| **💻 Software** | ESPHome **2026.8 or newer** (required for the Thread diagnostic sensors). CI builds with the release pinned in [`requirements.txt`](requirements.txt) (`pip install -r requirements.txt`), and `docker-compose.yml` runs the same one; Renovate updates both |
+| **💻 Software** | ESPHome **2026.9 or newer** (required for the encrypted OTA updates). CI builds with the release pinned in [`requirements.txt`](requirements.txt) (`pip install -r requirements.txt`), and `docker-compose.yml` runs the same one; Renovate updates both |
 | **🔌 Cable** | USB cable for initial flashing |
 | **📦 Optional** | 3D-printed case, see [3D-Printed Case](#3d-printed-case) |
 
@@ -354,6 +354,19 @@ openthread:
 
 > ⚠️ Respect the regulatory limits for 2.4 GHz in your country. More power only helps if the other devices can also reach the router, since Thread links are bidirectional.
 
+### Maximum Number of Children
+
+A router accepts up to **10 end devices** as direct children, the ESP-IDF default. If you have more devices around it, raise the limit in `esp32c6-thread-router.yaml` (each child needs some RAM):
+
+```yaml
+esp32:
+  board: esp32-c6-devkitm-1
+  framework:
+    type: esp-idf
+    sdkconfig_options:
+      CONFIG_OPENTHREAD_MLE_MAX_CHILDREN: "20"
+```
+
 ### 🔄 Thread Network Was Recreated / TLV Changed / Networks Merged
 
 The router stores the Thread dataset in flash after the first start and then **ignores** the `tlv` from the config. If the dataset of your network changes, the router stays in the old network. This happens when you:
@@ -389,6 +402,8 @@ Yes, as long as the router gets the dataset (TLV) of the network your devices ar
 ### Can the ESP32-C6 be a Thread border router?
 
 Not with this config. It is a router inside the mesh and needs a border router (e.g. OpenThread Border Router in Home Assistant, a HomePod, Nest Hub or Echo) to reach your LAN.
+
+ESPHome itself has an experimental [border router mode](https://esphome.io/components/openthread/#openthread-border-router) for the ESP32-C5 and ESP32-C6 since 2026.11. It needs WiFi, and on the ESP32-C6 WiFi and Thread share one 2.4 GHz RF path, which [costs performance](https://github.com/espressif/esp-idf/blob/master/examples/openthread/ot_br/README.md). This router deliberately works without WiFi.
 
 ### Why is it a child and not a router?
 
