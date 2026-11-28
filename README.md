@@ -205,7 +205,7 @@ docker compose restart
 
 ```bash
 podman run --rm --security-opt label=disable -v "$PWD":/config \
-  --device /dev/ttyACM0 ghcr.io/esphome/esphome:2026.11.0 \
+  --device /dev/ttyACM0 ghcr.io/esphome/esphome:2026.11.1 \
   run esp32c6-thread-router.yaml --device /dev/ttyACM0
 ```
 
@@ -232,7 +232,7 @@ docker compose exec esphome esphome run /config/esp32c6-thread-router.yaml --dev
 
 **Update over the air (Thread)** - no USB needed, runs a one-off container without the USB device:
 ```bash
-docker run --rm -it --network host -v "$PWD":/config ghcr.io/esphome/esphome:2026.11.0 run esp32c6-thread-router.yaml --device esp32c6-thread-router.local
+docker run --rm -it --network host -v "$PWD":/config ghcr.io/esphome/esphome:2026.11.1 run esp32c6-thread-router.yaml --device esp32c6-thread-router.local
 ```
 
 </details>
